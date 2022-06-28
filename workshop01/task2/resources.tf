@@ -2,6 +2,7 @@
 #   for_each = []
 # }
 
+# Create docker network
 resource "docker_network" "mynet" {
   name = var.network_name
 }
@@ -11,9 +12,9 @@ resource "docker_container" "northwind-app-container" {
   image = data.docker_image.northwind-app.id
   name  = var.app_name
   env = [
-    "DB_HOST = ${var.db_name}",
-    "DB_USER = ${var.db_user}",
-    "DB_PASSWORD = ${var.db_password}"
+    "DB_HOST=${docker_container.northwind-db-container.name}",
+    "DB_USER=${var.db_user}",
+    "DB_PASSWORD=${var.db_password}"
   ]
   # env = [
   #   "DB_HOST = mydb",
@@ -33,10 +34,10 @@ resource "docker_container" "northwind-app-container" {
 resource "docker_container" "northwind-db-container" {
   image = data.docker_image.northwind-db.id
   name  = var.db_name
-  # ports {
-  #   internal = 3306
-  #   external = 3306
-  # }
+  ports {
+    internal = 3306
+    external = 3306
+  }
   networks_advanced {
     name = docker_network.mynet.name
   }

@@ -31,9 +31,3 @@ variable "db_vol_name" {
   type    = string
   default = "dbvol"
 }
-
-
-# variable "nw_images" {
-#   type = 
-
-# }
