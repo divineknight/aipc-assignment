@@ -1,3 +1,15 @@
+resource "docker_image" "northwind-app" {
+  name = "stackupiss/northwind-app:v1"
+  # force_remove = false
+  # keep_locally = true
+}
+
+resource "docker_image" "northwind-db" {
+  name = "stackupiss/northwind-db:v1"
+  # force_remove = false
+  # keep_locally = true
+}
+
 # Create docker network
 resource "docker_network" "mynet" {
   name = var.network_name
@@ -5,7 +17,7 @@ resource "docker_network" "mynet" {
 
 # Create a container for app
 resource "docker_container" "northwind-app-container" {
-  image = data.docker_image.northwind-app.id
+  image = docker_image.northwind-app.latest
   name  = var.app_name
   env = [
     "DB_HOST=${docker_container.northwind-db-container.name}",
@@ -23,7 +35,7 @@ resource "docker_container" "northwind-app-container" {
 
 # Create a container for db
 resource "docker_container" "northwind-db-container" {
-  image = data.docker_image.northwind-db.id
+  image = docker_image.northwind-db.latest
   name  = var.db_name
   ports {
     internal = 3306
