@@ -4,8 +4,8 @@
     code_server_version: 4.4.0
     packages_to_install:
     - nginx
-    - certbot
-    - python3-certbot-nginx
+    # - certbot
+    # - python3-certbot-nginx
 
   tasks: 
   - name: Install applications

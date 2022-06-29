@@ -30,3 +30,8 @@ variable "DO_size" {
   type    = string
   default = "s-1vcpu-2gb"
 }
+
+variable "code_server_pwd" {
+  type      = string
+  sensitive = true
+}
