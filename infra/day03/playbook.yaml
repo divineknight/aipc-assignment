@@ -1,0 +1,14 @@
+- name: Install nginx
+  hosts: all
+  tasks:
+    - name: Install nginx
+      apt:
+        update_cache: yes
+        name: nginx
+        state: present
+    - name: Start nginx
+      systemd:
+        state: started
+        name: nginx 
+        enabled: yes
+

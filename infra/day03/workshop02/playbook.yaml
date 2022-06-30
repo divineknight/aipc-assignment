@@ -1,0 +1,87 @@
+- name: Code Server
+  hosts: all
+  vars:
+    code_server_version: 4.4.0
+    packages_to_install:
+    - nginx
+    # - certbot
+    # - python3-certbot-nginx
+
+  tasks: 
+  - name: Install applications
+    apt: 
+      update_cache: yes
+      name: "{{ packages_to_install }}"
+      state: latest
+
+  - name: Create directory '/usr/lib/code-server'
+    file:
+      path: /usr/lib/code-server
+      state: directory
+      mode: '0755'
+
+  - name: Download code server and unarchive on remote 
+    unarchive:
+      src: https://github.com/coder/code-server/releases/download/v{{ code_server_version }}/code-server-{{ code_server_version }}-linux-amd64.tar.gz
+      dest: /usr/lib/code-server
+      remote_src: yes
+
+  - name: Create a symbolic link for code server
+    file:
+      src: /usr/lib/code-server/code-server-{{ code_server_version }}-linux-amd64/bin/code-server
+      dest: /usr/bin/code-server
+      state: link
+
+  - name: Create directory '/var/lib/code-server' to store user data
+    file:
+      path: /var/lib/code-server
+      state: directory
+      mode: '0755'
+
+  - name: Copy code-server service
+    template:
+      src: ./template/code-server.service.j2
+      dest: /lib/systemd/system/code-server.service
+
+  - name: Start and enable code server service
+    systemd:
+      daemon_reload: yes
+      name: code-server
+      enabled: true
+      state: started
+
+  - name: Copy and config code-server.conf
+    template:
+      src: ./template/code-server.conf.j2
+      dest: /etc/nginx/sites-available/code-server.conf
+  
+  # sudo ln -s /etc/nginx/sites-available/code-server.conf /etc/nginx/sites-enabled/code-server.conf 
+  - name: Create a symbolic link /etc/nginx/sites-available/code-server.conf /etc/nginx/sites-enabled/code-server.conf 
+    file:
+      src: /etc/nginx/sites-available/code-server.conf
+      dest: /etc/nginx/sites-enabled/code-server.conf
+      state: link
+
+  # sudo systemctl restart nginx
+  - name: Restart nginx service
+    systemd:
+      daemon_reload: yes
+      name: nginx
+      state: restarted
+
+  # sudo ufw allow ssh
+  - name: Allow ssh
+    ufw:
+      rule: allow
+      port: ssh
+      proto: tcp
+  - name: Allow https
+    ufw:
+      rule: allow
+      port: https
+      proto: tcp
+
+  # sudo ufw reload
+  - name: Reload UFW
+    ufw:
+      state: reloaded
